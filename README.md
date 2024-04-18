@@ -12,7 +12,7 @@ Desenvolupar un codi el qual implementi tot el vist a la unitat de “Fem de pro
 ##### 4. Canvi d'animacions:
   - El personatge, a mesura que avança, anirà canviant d'animació per simular els gests que realitza (córrer, saltar, ajupir-se)
 ##### 5. Possibles imatges del joc
-![flat,750x,075,f-pad,750x1000,f8f8f8](https://github.com/MichaelJamesAS/Proyecto_Final/assets/160112486/143f5447-b0ff-48ba-bf90-1c3dfb541f2e)
+![flat,750x,075,f-pad,250x333,f8f8f8](https://github.com/MichaelJamesAS/Proyecto_Final/assets/160112486/143f5447-b0ff-48ba-bf90-1c3dfb541f2e)
 
 **Material relacionat amb la unitat: Fem de profes.**
 - Base de dades: Utilitzar la base de dades SQLite per emmagatzemar informació d’inventaris, productes, transaccions, etc.

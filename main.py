@@ -1,9 +1,10 @@
 import pygame
 import os
+import random
 
 pygame.init()
 
-#Constantes globales
+# Constantes globales
 Screen_height = 600
 Screen_width = 1100
 Screen = pygame.display.set_mode((Screen_width, Screen_width))
@@ -24,7 +25,7 @@ Large_cactus = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.pn
 Bird = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
         pygame.image.load(os.path.join("Assets/Bird", "Bird2.png"))]
 
-Clouds = [pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))]
+cloud = [pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))]
 
 BG = [pygame.image.load(os.path.join("Assets/Other", "Track.png"))]
 
@@ -99,11 +100,29 @@ class Dinosaur:
     def draw(self, Screen):
         Screen.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
+class Cloud: #Las nubes van pasando de derecha a izquierda
+    def __init__(self):
+            self.x = Screen_width + random.randint(800, 1000)
+            self.y = random.randint(50, 100)
+            self.image = cloud
+            self.width = self.image.get_width()
+
+    def update(self):
+        self.x -= game_speed
+        if self.x < -self.width:
+            self.x = Screen_width + random.randint (2500, 3000)
+            self.y = random.randint(50,100)
+
+    def draw(self, SCREEN):
+        Screen.blit(self.image, (self.x, self.y))
 
 def main():
+    global game_speed
     run = True
     clock = pygame.time.Clock()
     player = Dinosaur() #Instancia de la classe Dinosaur
+    game_speed = 14
+    cloud = Cloud()
 
     while run: #Cuando pulsamo la X de la ventana, acaba el loop de forma segura
         for event in pygame.event.get():
@@ -115,6 +134,9 @@ def main():
         player.draw(Screen)
         player.update(userInput)
 
+        cloud.draw(Screen)
+        Cloud.update()
+        
         clock.tick(30)
         pygame.display.update()
     
