@@ -18,4 +18,7 @@ Desenvolupar un codi el qual implementi tot el vist a la unitat de “Fem de pro
 - Base de dades: Utilitzar la base de dades SQLite per emmagatzemar informació d’inventaris, productes, transaccions, etc.
 - Interfície d'usuari: Crear una interfície d'usuari intuïtiva usant biblioteques com PyGame que permetin la creació del joc de manera intuïtiva.
 - Orientació a objectes: Crear classes per a diferents tipus d’objectes.
-- Maneig de Sessions (GitHub): Implementar un sistema de gestió de sessions per controlar l'accés dels usuaris a les funcions del programa. A més, documentar el codi adequadament perquè altres desenvolupadors puguin entendre i modificar el programa si cal per poder fer feina en equip. 
+- Maneig de Sessions (GitHub): Implementar un sistema de gestió de sessions per controlar l'accés dels usuaris a les funcions del programa. A més, documentar el codi adequadament perquè altres desenvolupadors puguin entendre i modificar el programa si cal per poder fer feina en equip.
+
+
+Codigo Realizzado con estos [videoturoiales](https://www.youtube.com/playlist?list=PL30AETbxgR-fAbwiuU1vDl3owNUPUuVrz)
