@@ -31,6 +31,8 @@ BG = [pygame.image.load(os.path.join("Assets/Other", "Track.png"))]
 class Dinosaur:
     x_pos = 80
     y_pos = 310
+    y_pos_duck = 340
+    jump_vel = 0.5
 
     def __init__(self):
         self.duck_img = Ducking
@@ -42,6 +44,7 @@ class Dinosaur:
         self.dino_jump =  False
 
         self.step_index = 0
+        self.jump_vel = self.jump_vel
         self.image = self.run_img[0]
         self.dino_rect = self.image.get_rect() #rect viene de rectangulo
         self.dino_rect.x = self.x_pos
@@ -72,7 +75,11 @@ class Dinosaur:
             self.dino_jump =  False
 
     def duck(self):
-        pass
+        self.image = self.duck_img[self.step_index// 5]
+        self.dino_rect = self.image.get_rect()
+        self.dino_rect.x = self.x_pos
+        self.dino_rect.y = self.y_pos_duck #igual que el run pero cambiando la posicion y por la posicion y en agachado
+        self.step_index += 1 
 
     def run(self):
         self.image = self.run_img[self.step_index // 5]
@@ -82,7 +89,12 @@ class Dinosaur:
         self.step_index += 1 #del 1 al 5 seran un sprite, de 5 a 10 el otro, dando la isluion de que estan animados
 
     def jump(self):
-        pass
+        self.image = self.jump_img
+        if self.dino_jump:
+            self.dino_rect.y -= self.jump_vel * 4
+            self.jump_vel -= 0.8 #se reduce la velocidad cuando salta
+        if  self.jump_vel < - self.jump_vel:
+            self.dino_jump = False
 
     def draw(self, Screen):
         Screen.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
