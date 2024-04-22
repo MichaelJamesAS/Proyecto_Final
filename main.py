@@ -126,7 +126,7 @@ def main():
     x_pos_bg = 0
     y_pos_bg = 380
     points = 0
-    font = pygame.font.Font('freesansbold.ttf', 20
+    font = pygame.font.Font('freesansbold.ttf', 20)
                             
     def score(): #Puntuacion del personaje
         global points, game_speed
