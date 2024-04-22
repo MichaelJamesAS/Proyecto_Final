@@ -116,8 +116,50 @@ class Cloud: #Las nubes van pasando de derecha a izquierda
     def draw(self, SCREEN):
         Screen.blit(self.image, (self.x, self.y))
 
+class Obstacle:
+    def __init__(self, image, type):
+        self.image = image
+        self.type = type
+        self.rect = self.image[self.type].get_rect()
+        self.rect.x = Screen_width
+
+    def update(self):
+        self.rect.x -= game_speed
+        if self.rect.x < -self.rect.width:
+            obstacles.pop()
+
+    def draw(self, Screen):
+        Screen.blit(self.image[self.type], self.rect)
+    
+class SmallCactus(Obstacle):
+    def __init__(self, image):
+        self.type = random.randint(0, 2)
+        super().__init__(image, self.type)
+        self.rect.y = 325
+
+class LargeCactus(Obstacle):
+    def __init__(self, image):
+        self.type = random.randint(0, 2)
+        super().__init__(image, self.type)
+        self.rect.y = 300
+
+class Bird(Obstacle): #Solo un tipo que es animado
+    def __init__(self, image):
+        self.type = 0
+        super().__init__(image, self.type)
+        self.rect.y = 250
+        self.index = 0
+
+    def draw(self, Screen): #Diferente porque el pajaro es animado
+        if self.index >= 9:
+            self.index = 0
+        Screen.blit(self.image[self.index//5], self.rect) #Las cinco primeras, primer esprite, despues el segunod, y se resetea al 10
+    
+        self.index += 1
+
+
 def main():
-    global game_speed, x_pos_bg, y_pos_bg, points
+    global game_speed, x_pos_bg, y_pos_bg, points, obstacles
     run = True
     clock = pygame.time.Clock()
     player = Dinosaur() #Instancia de la classe Dinosaur
@@ -127,7 +169,9 @@ def main():
     y_pos_bg = 380
     points = 0
     font = pygame.font.Font('freesansbold.ttf', 20)
+    obstacles = []
                             
+
     def score(): #Puntuacion del personaje
         global points, game_speed
         points += 1
@@ -136,8 +180,8 @@ def main():
         
         text = font.render("Points: " + str(points), True, (0,0,0)) #Display de los puntos en la pantalla
         textRect = text.get_rect()
-        textRect.center = (1000,40
-        Screen.blit(text, textRect))
+        textRect.center = (1000,40)
+        Screen.blit(text, textRect)
     
     def background():
         global x_pos_bg, y_pos_bg
@@ -158,6 +202,20 @@ def main():
 
         player.draw(Screen)
         player.update(userInput)
+
+        if len(obstacles) == 0:
+            if random.randint(0,2) == 0:
+                obstacles.append(SmallCactus(Small_cactus))
+            if random.randint(0,2) == 1:
+                obstacles.append(LargeCactus(Large_cactus))
+            if random.randint(0,2) == 2:
+                obstacles.append(Bird(Bird))
+
+        for obstacle in obstacles:
+            obstacle.draw(Screen)
+            obstacle.update()
+            if player.dino_rect.colliderect(obstacle.rect):
+                pygame.draw.rect(Screen, (255, 0, 0), player.dino_rect, 2)
 
         background()
 
