@@ -170,7 +170,4 @@ def main():
         pygame.display.update()
     
 
-
-
-
 main()
