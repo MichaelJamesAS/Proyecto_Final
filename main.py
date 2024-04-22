@@ -117,14 +117,39 @@ class Cloud: #Las nubes van pasando de derecha a izquierda
         Screen.blit(self.image, (self.x, self.y))
 
 def main():
-    global game_speed
+    global game_speed, x_pos_bg, y_pos_bg, points
     run = True
     clock = pygame.time.Clock()
     player = Dinosaur() #Instancia de la classe Dinosaur
-    game_speed = 14
     cloud = Cloud()
+    game_speed = 14
+    x_pos_bg = 0
+    y_pos_bg = 380
+    points = 0
+    font = pygame.font.Font('freesansbold.ttf', 20
+                            
+    def score(): #Puntuacion del personaje
+        global points, game_speed
+        points += 1
+        if points % 100 == 0:
+            game_speed += 1
+        
+        text = font.render("Points: " + str(points), True, (0,0,0)) #Display de los puntos en la pantalla
+        textRect = text.get_rect()
+        textRect.center = (1000,40
+        Screen.blit(text, textRect))
+    
+    def background():
+        global x_pos_bg, y_pos_bg
+        image_width = BG.get_width()
+        Screen.blit(BG, (x_pos_bg, y_pos_bg))
+        Screen.blit(BG, (image_width + x_pos_bg, y_pos_bg))
+        if x_pos_bg <= -image_width:
+            Screen.blit (BG, image_width + x_pos_bg, y_pos_bg)
+            x_pos_bg = 0
+        x_pos_bg -= game_speed
 
-    while run: #Cuando pulsamo la X de la ventana, acaba el loop de forma segura
+    while run: #Cuando pulsamos la X de la ventana, acaba el loop de forma segura
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -134,8 +159,12 @@ def main():
         player.draw(Screen)
         player.update(userInput)
 
+        background()
+
         cloud.draw(Screen)
         Cloud.update()
+
+        score()
         
         clock.tick(30)
         pygame.display.update()
