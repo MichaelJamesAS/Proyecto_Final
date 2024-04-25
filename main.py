@@ -170,7 +170,7 @@ def main():
     points = 0
     font = pygame.font.Font('freesansbold.ttf', 20)
     obstacles = []
-                            
+    death_count = 0
 
     def score(): #Puntuacion del personaje
         global points, game_speed
@@ -215,7 +215,9 @@ def main():
             obstacle.draw(Screen)
             obstacle.update()
             if player.dino_rect.colliderect(obstacle.rect):
-                pygame.draw.rect(Screen, (255, 0, 0), player.dino_rect, 2)
+                pygame.time.delay(2000)
+                death_count += 1
+                menu(death_count)
 
         background()
 
@@ -228,4 +230,31 @@ def main():
         pygame.display.update()
     
 
-main()
+def menu(death_count): #Muestra la puntuacion al finalizar la partida y da la opcion de empezar una nueva
+    global points
+    run = True
+    while run:
+        screen.fill((255, 255, 255))
+        font = pygame.font.Font('freesansbold.ttf', 30)
+
+        if death_count == 0:
+            text = font.render("Pulsa cualquier Tecla para Empezar", True, (0, 0, 0))
+        elif death_count > 0:
+            text = font.render("Pulsa cualquier Tecla para Empezar de Nuevo", True, (0, 0, 0))
+            score = font.render("Tu puntuacion: " + str(points), True, (0, 0, 0))
+            scoreRect = score.get_rect()
+            scoreRect.center = (screen_width // 2, screen_height // 2 + 50)
+            screen.blit(score, scoreRect)
+        textRect = text.get_rect()
+        textRect.center = (screen_width // 2, screen_height // 2)
+        screen.blit(text, textRect)
+        screen.blit(running[0], (screen_width // 2 - 20, screen_height // 2 - 140))
+        pygame.display.update()
+        for event in pygame.event.get(): #Opcion segura para salir del juego
+            if event.type == pygame.quit:
+                run = False
+            if event.type == pygame.keydown:
+                main()
+
+
+menu(death_count = 0)
