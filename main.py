@@ -1,260 +1,274 @@
 import pygame
 import os
 import random
+import sqlite3
 
 pygame.init()
 
-# Constantes globales
-Screen_height = 600
-Screen_width = 1100
-Screen = pygame.display.set_mode((Screen_width, Screen_width))
+# Nuestras constantes globales
+ALTURA_PANTALLA = 600
+ANCHURA_PANTALLA = 1100
+PANTALLA = pygame.display.set_mode((ANCHURA_PANTALLA, ALTURA_PANTALLA))
 
-Running = [pygame.image.load(os.path.join("Assets/Dino", "DinoRun1.png")),
-           pygame.image.load(os.path.join("Assets/Dino", "DinoRun2.png"))] #Guarda las imagenes relacionadas con correr
-Jumping = [pygame.image.load(os.path.join("Assets/Dino", "DinoJump.png"))]
-Ducking = [pygame.image.load(os.path.join("Assets/Dino", "DinoDuck1.png")),
+# Guardamos las imagenes relacionadas con diferentes objetos y acciones del juego
+CORRER = [pygame.image.load(os.path.join("Assets/Dino", "DinoRun1.png")),
+           pygame.image.load(os.path.join("Assets/Dino", "DinoRun2.png"))]
+SALTAR = pygame.image.load(os.path.join("Assets/Dino", "DinoJump.png"))
+AGACHAR = [pygame.image.load(os.path.join("Assets/Dino", "DinoDuck1.png")),
            pygame.image.load(os.path.join("Assets/Dino", "DinoDuck2.png"))]
 
-Small_cactus = [pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus1.png")),
-          pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus2.png")),
-          pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus3.png"))]
-Large_cactus = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.png")),
-          pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus2.png")),
-          pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus3.png"))]
+CACTUS_P = [pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus1.png")),
+                pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus2.png")),
+                pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus3.png"))]
+CACTUS_G = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.png")),
+                pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus2.png")),
+                pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus3.png"))]
 
-Bird = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
+VOLADOR = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
         pygame.image.load(os.path.join("Assets/Bird", "Bird2.png"))]
 
-cloud = [pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))]
+NUBE = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
 
-BG = [pygame.image.load(os.path.join("Assets/Other", "Track.png"))]
+BG = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
 
-class Dinosaur:
-    x_pos = 80
-    y_pos = 310
-    y_pos_duck = 340
-    jump_vel = 0.5
+
+class Dinosaurio:
+    X_POS = 80
+    Y_POS = 310
+    Y_POS_AGACHADO = 340
+    VEL_SALTO = 8.5
 
     def __init__(self):
-        self.duck_img = Ducking
-        self.run_img = Running
-        self.jump_img = Jumping
+        self.agachar_img = AGACHAR
+        self.correr_img = CORRER
+        self.saltar_img = SALTAR
 
-        self.dino_duck = False
-        self.dino_run = True #Este es true debido a que cuando comienza el juego o justo antes de empezar el dinosaurio esta correindo
-        self.dino_jump =  False
+        self.dino_agachar = False
+        self.dino_correr = True # Este esta configurado com True porque, cuando comienza el juego o justo antes de empezar, el dinosaurio esta corriendo.
+        self.dino_saltar = False
 
         self.step_index = 0
-        self.jump_vel = self.jump_vel
-        self.image = self.run_img[0]
-        self.dino_rect = self.image.get_rect() #rect viene de rectangulo
-        self.dino_rect.x = self.x_pos
-        self.dino_rect.y = self.y_pos
+        self.vel_salto = self.VEL_SALTO
+        self.image = self.correr_img[0]
+        self.dino_rect = self.image.get_rect() # Rect se refiere a rectangulo
+        self.dino_rect.x = self.X_POS
+        self.dino_rect.y = self.Y_POS
 
-    def update(self, userInput): #se actualiza segun el input del usuario
-        if self.dino_duck:
-            self.duck()
-        if self.dino_run:
-            self.run()
-        if self.dino_jump:
-            self.jump()
+    def update(self, userInput): # Se actualiza segun el input del usuario 
+        if self.dino_agachar:
+            self.agachar()
+        if self.dino_correr:
+            self.correr()        
+        if self.dino_saltar:
+            self.saltar()
 
         if self.step_index >= 10:
             self.step_index = 0
 
-        if userInput[pygame.K_UP] and not self.dino_jump:
-            self.dino_duck = False
-            self.dino_run = False 
-            self.dino_jump =  True
-        elif userInput[pygame.K_DOWN] and not self.dino_jump:
-            self.dino_duck = True
-            self.dino_run = False 
-            self.dino_jump =  False
-        elif not (self.dino_jump or userInput[pygame.K_DOWN]):
-            self.dino_duck = False
-            self.dino_run = True 
-            self.dino_jump =  False
+        if userInput[pygame.K_UP] and not self.dino_saltar: # Saltamos al pulsar la tecla hacia arriba
+            self.dino_agachar = False
+            self.dino_correr = False
+            self.dino_saltar = True
+        elif userInput[pygame.K_DOWN] and not self.dino_saltar: # Nos agachamos al pulsar la tecla hacia abajo
+            self.dino_agachar = True
+            self.dino_correr = False
+            self.dino_saltar = False
+        elif not (self.dino_saltar or userInput[pygame.K_DOWN]): # Nos mantenemos corriendo si no nos agachamos ni saltamos
+            self.dino_agachar = False
+            self.dino_correr = True
+            self.dino_saltar = False
 
-    def duck(self):
-        self.image = self.duck_img[self.step_index// 5]
+    def agachar(self):
+        self.image = self.agachar_img[self.step_index // 5]
         self.dino_rect = self.image.get_rect()
-        self.dino_rect.x = self.x_pos
-        self.dino_rect.y = self.y_pos_duck #igual que el run pero cambiando la posicion y por la posicion y en agachado
-        self.step_index += 1 
+        self.dino_rect.x = self.X_POS
+        self.dino_rect.y = self.Y_POS_AGACHADO # Igual que el run, pero cambiando la posicion_y por la posicion_y_agachado
+        self.step_index += 1
 
-    def run(self):
-        self.image = self.run_img[self.step_index // 5]
+    def correr(self):
+        self.image = self.correr_img[self.step_index // 5]
         self.dino_rect = self.image.get_rect()
-        self.dino_rect.x = self.x_pos
-        self.dino_rect.y = self.y_pos
-        self.step_index += 1 #del 1 al 5 seran un sprite, de 5 a 10 el otro, dando la isluion de que estan animados
+        self.dino_rect.x = self.X_POS
+        self.dino_rect.y = self.Y_POS
+        self.step_index += 1 # Del 1 al 5 seran un Sprite, de 5 a 10 el otro, dando la isluion de que el personaje esta animado
 
-    def jump(self):
-        self.image = self.jump_img
-        if self.dino_jump:
-            self.dino_rect.y -= self.jump_vel * 4
-            self.jump_vel -= 0.8 #se reduce la velocidad cuando salta
-        if  self.jump_vel < - self.jump_vel:
-            self.dino_jump = False
+    def saltar(self):
+        self.image = self.saltar_img
+        if self.dino_saltar:
+            self.dino_rect.y -= self.vel_salto * 4
+            self.vel_salto -= 0.8 # Se reduce la velocidad cuando salta
+        if self.vel_salto < - self.VEL_SALTO:
+            self.dino_saltar = False
+            self.vel_salto = self.VEL_SALTO
 
-    def draw(self, Screen):
-        Screen.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
+    def draw(self, PANTALLA):
+        PANTALLA.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
-class Cloud: #Las nubes van pasando de derecha a izquierda
+
+class Nube:  # La clase se encarga de mover las nubes de derecha a izquierda
     def __init__(self):
-            self.x = Screen_width + random.randint(800, 1000)
-            self.y = random.randint(50, 100)
-            self.image = cloud
-            self.width = self.image.get_width()
+        self.x = ANCHURA_PANTALLA + random.randint(800, 1000)
+        self.y = random.randint(50, 100)
+        self.image = NUBE
+        self.anchura = self.image.get_width()
 
     def update(self):
-        self.x -= game_speed
-        if self.x < -self.width:
-            self.x = Screen_width + random.randint (2500, 3000)
-            self.y = random.randint(50,100)
+        self.x -= vel_juego
+        if self.x < -self.anchura:
+            self.x = ANCHURA_PANTALLA + random.randint(2500, 3000)
+            self.y = random.randint(50, 100)
 
-    def draw(self, SCREEN):
-        Screen.blit(self.image, (self.x, self.y))
+    def draw(self, PANTALLA):
+        PANTALLA.blit(self.image, (self.x, self.y))
 
-class Obstacle:
+class Obstaculo: # La clase se encarga de definir los atributos de un obstaculo en general
     def __init__(self, image, type):
         self.image = image
         self.type = type
         self.rect = self.image[self.type].get_rect()
-        self.rect.x = Screen_width
+        self.rect.x = ANCHURA_PANTALLA
 
     def update(self):
-        self.rect.x -= game_speed
+        self.rect.x -= vel_juego
         if self.rect.x < -self.rect.width:
-            obstacles.pop()
+            obstaculos.pop()
 
-    def draw(self, Screen):
-        Screen.blit(self.image[self.type], self.rect)
-    
-class SmallCactus(Obstacle):
+    def draw(self, PANTALLA):
+        PANTALLA.blit(self.image[self.type], self.rect)
+
+
+class PCactus(Obstaculo): # Definimos las qualidades de los cactus pequeños
     def __init__(self, image):
         self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 325
 
-class LargeCactus(Obstacle):
+
+class GCactus(Obstaculo): # Definimos las qualidades de los cactus grandes
     def __init__(self, image):
         self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 300
 
-class Bird(Obstacle): #Solo un tipo que es animado
+
+class Volador(Obstaculo): # Definimos las qualidades del objeto volador (Pterodactilo). 
     def __init__(self, image):
         self.type = 0
         super().__init__(image, self.type)
         self.rect.y = 250
         self.index = 0
 
-    def draw(self, Screen): #Diferente porque el pajaro es animado
+    def draw(self, PANTALLA): # Esta parte de aqui esta incluida porque el pajaro este animado
         if self.index >= 9:
             self.index = 0
-        Screen.blit(self.image[self.index//5], self.rect) #Las cinco primeras, primer esprite, despues el segunod, y se resetea al 10
-    
+        PANTALLA.blit(self.image[self.index//5], self.rect) # Los cinco primeros ticks,  aparece el primer esprite. Los otro cinco siguientes, el segundo sprite Se resetea al tick 10 (Onceavo tick)
         self.index += 1
 
 
 def main():
-    global game_speed, x_pos_bg, y_pos_bg, points, obstacles
+    global vel_juego, x_pos_bg, y_pos_bg, puntos, obstaculos
     run = True
-    clock = pygame.time.Clock()
-    player = Dinosaur() #Instancia de la classe Dinosaur
-    cloud = Cloud()
-    game_speed = 14
+    reloj = pygame.time.Clock()
+    jugador = Dinosaurio()  # Instancia de la classe Dinosaur
+    nube = Nube() # Instancia de la classe Nube
+    vel_juego = 20
     x_pos_bg = 0
     y_pos_bg = 380
-    points = 0
+    puntos = 0
     font = pygame.font.Font('freesansbold.ttf', 20)
-    obstacles = []
-    death_count = 0
+    obstaculos = []
+    cont_muertes = 0
 
-    def score(): #Puntuacion del personaje
-        global points, game_speed
-        points += 1
-        if points % 100 == 0:
-            game_speed += 1
-        
-        text = font.render("Points: " + str(points), True, (0,0,0)) #Display de los puntos en la pantalla
-        textRect = text.get_rect()
-        textRect.center = (1000,40)
-        Screen.blit(text, textRect)
-    
-    def background():
+    def puntuacion(): # Función que se encarga de la puntuacion del jugador
+        global puntos, vel_juego
+        puntos += 1
+        if puntos % 100 == 0:
+            vel_juego += 1
+
+        texto = font.render("Puntos: " + str(puntos), True, (0, 0, 0)) # Parte de la funcion que nos muestra los puntos mientras jugamos
+        textoRect = texto.get_rect()
+        textoRect.center = (1000, 40)
+        PANTALLA.blit(texto, textoRect)
+
+    def background(): # Funcion que se encarga en el desplazamiento del fondo
         global x_pos_bg, y_pos_bg
-        image_width = BG.get_width()
-        Screen.blit(BG, (x_pos_bg, y_pos_bg))
-        Screen.blit(BG, (image_width + x_pos_bg, y_pos_bg))
-        if x_pos_bg <= -image_width:
-            Screen.blit (BG, image_width + x_pos_bg, y_pos_bg)
+        anchura_imagen = BG.get_width()
+        PANTALLA.blit(BG, (x_pos_bg, y_pos_bg))
+        PANTALLA.blit(BG, (anchura_imagen + x_pos_bg, y_pos_bg))
+        if x_pos_bg <= -anchura_imagen:
+            PANTALLA.blit(BG, (anchura_imagen + x_pos_bg, y_pos_bg))
             x_pos_bg = 0
-        x_pos_bg -= game_speed
+        x_pos_bg -= vel_juego
 
-    while run: #Cuando pulsamos la X de la ventana, acaba el loop de forma segura
+    while run: # Cuando pulsamos la X de la ventana, acaba el loop de forma segura
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        Screen.fill((255,255,255))
+
+        PANTALLA.fill((255, 255, 255))
         userInput = pygame.key.get_pressed()
 
-        player.draw(Screen)
-        player.update(userInput)
+        jugador.draw(PANTALLA)
+        jugador.update(userInput)
 
-        if len(obstacles) == 0:
-            if random.randint(0,2) == 0:
-                obstacles.append(SmallCactus(Small_cactus))
-            if random.randint(0,2) == 1:
-                obstacles.append(LargeCactus(Large_cactus))
-            if random.randint(0,2) == 2:
-                obstacles.append(Bird(Bird))
+        if len(obstaculos) == 0:
+            if random.randint(0, 2) == 0:
+                obstaculos.append(PCactus(CACTUS_P))
+            elif random.randint(0, 2) == 1:
+                obstaculos.append(GCactus(CACTUS_G))
+            elif random.randint(0, 2) == 2:
+                obstaculos.append(Volador(VOLADOR))
 
-        for obstacle in obstacles:
-            obstacle.draw(Screen)
-            obstacle.update()
-            if player.dino_rect.colliderect(obstacle.rect):
+        for obstaculo in obstaculos: # Nos encargamos de no sobre saturar la pantalla con obstaculos. Nos aseguramos de que sea pasable.
+            obstaculo.draw(PANTALLA)
+            obstaculo.update()
+            if jugador.dino_rect.colliderect(obstaculo.rect):
                 pygame.time.delay(2000)
-                death_count += 1
-                menu(death_count)
+                cont_muertes += 1
+                menu(cont_muertes)
 
         background()
 
-        cloud.draw(Screen)
-        Cloud.update()
+        nube.draw(PANTALLA)
+        nube.update()
 
-        score()
-        
-        clock.tick(30)
+        puntuacion()
+
+        reloj.tick(30)
         pygame.display.update()
-    
 
-def menu(death_count): #Muestra la puntuacion al finalizar la partida y da la opcion de empezar una nueva
-    global points
+
+def menu(cont_muertes): # Muestra la puntuacion al finalizar la partida y da la opcion de empezar una nueva
+    global puntos
     run = True
-    while run:
-        Screen.fill((255, 255, 255))
-        font = pygame.font.Font('freesansbold.ttf', 30)
 
-        if death_count == 0:
-            text = font.render("Pulsa cualquier Tecla para Empezar", True, (0, 0, 0))
-        elif death_count > 0:
-            text = font.render("Pulsa cualquier Tecla para Empezar de Nuevo", True, (0, 0, 0))
-            score = font.render("Tu puntuacion: " + str(points), True, (0, 0, 0))
-            scoreRect = score.get_rect()
-            scoreRect.center = (Screen_width // 2, Screen_height // 2 + 50)
-            Screen.blit(score, scoreRect)
-        textRect = text.get_rect()
-        textRect.center = (Screen_width // 2, Screen_height // 2)
-        Screen.blit(text, textRect)
-        Screen.blit(Running[0], (Screen_width // 2 - 20, Screen_height // 2 - 140))
+    while run:
+        PANTALLA.fill((255, 255, 255))
+        font = pygame.font.Font(None, 30)
+
+        if cont_muertes == 0:
+            texto = font.render("Press any Key to Start", True, (0, 0, 0))
+
+        elif cont_muertes > 0:
+            texto = font.render("Press any Key to Restart", True, (0, 0, 0))
+            punto = font.render("Your Score: " + str(puntos), True, (0, 0, 0))
+            puntoRect = punto.get_rect()
+            puntoRect.center = (ANCHURA_PANTALLA // 2, ALTURA_PANTALLA // 2 + 50)
+            PANTALLA.blit(punto, puntoRect)
+
+        textoRect = texto.get_rect()
+        textoRect.center = (ANCHURA_PANTALLA // 2, ALTURA_PANTALLA // 2)
+        PANTALLA.blit(texto, textoRect)
+        PANTALLA.blit(CORRER[0], (ANCHURA_PANTALLA // 2 - 20, ALTURA_PANTALLA // 2 - 140))
         pygame.display.update()
+
         for event in pygame.event.get(): #Opcion segura para salir del juego
-            if event.type == pygame.quit:
+            if event.type == pygame.QUIT:
+                pygame.quit()
                 run = False
-            if event.type == pygame.keydown:
+             
+            if event.type == pygame.KEYDOWN:
                 main()
 
 
-menu(death_count = 0)
+menu(cont_muertes=0)
