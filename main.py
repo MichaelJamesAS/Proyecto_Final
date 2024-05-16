@@ -3,6 +3,12 @@ import os
 import random
 import sqlite3
 
+base1 = sqlite3.connect('dino2')
+
+punts = base1.cursor()
+
+puntuacio_guardada = False
+
 pygame.init()
 
 # Nuestras constantes globales
@@ -237,9 +243,15 @@ def main():
         reloj.tick(30)
         pygame.display.update()
 
+def guardar_puntuacio(puntos, nom):
+    global puntuacio_guardada
+    if puntuacio_guardada == False:
+        punts.execute("insert into punts (nom, puntuacio) values (?, ?)", (nom, puntos))
+        base1.commit()
+        puntuacio_guardada = True
 
 def menu(cont_muertes): # Muestra la puntuacion al finalizar la partida y da la opcion de empezar una nueva
-    global puntos
+    global puntos, puntuacio_guardada 
     run = True
 
     while run:
@@ -249,13 +261,15 @@ def menu(cont_muertes): # Muestra la puntuacion al finalizar la partida y da la 
         if cont_muertes == 0:
             texto = font.render("Press any Key to Start", True, (0, 0, 0))
 
-        elif cont_muertes > 0:
+        elif cont_muertes > 0:        
+            guardar_puntuacio(puntos, "test")            
             texto = font.render("Press any Key to Restart", True, (0, 0, 0))
             punto = font.render("Your Score: " + str(puntos), True, (0, 0, 0))
             puntoRect = punto.get_rect()
             puntoRect.center = (ANCHURA_PANTALLA // 2, ALTURA_PANTALLA // 2 + 50)
             PANTALLA.blit(punto, puntoRect)
 
+        
         textoRect = texto.get_rect()
         textoRect.center = (ANCHURA_PANTALLA // 2, ALTURA_PANTALLA // 2)
         PANTALLA.blit(texto, textoRect)
@@ -268,7 +282,9 @@ def menu(cont_muertes): # Muestra la puntuacion al finalizar la partida y da la 
                 run = False
              
             if event.type == pygame.KEYDOWN:
+                puntuacio_guardada = False
                 main()
+
 
 
 menu(cont_muertes=0)
